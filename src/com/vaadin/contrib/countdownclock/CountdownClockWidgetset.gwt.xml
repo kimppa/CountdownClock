@@ -1,0 +1,8 @@
+<module>
+	<!-- Inherit super widgetset -->
+	<inherits name="com.vaadin.terminal.gwt.DefaultWidgetSet" /> 
+	
+	<!-- Entry point -->
+	<entry-point class="com.vaadin.contrib.countdownclock.client.CountdownClockWidgetset"/>
+	
+</module>
