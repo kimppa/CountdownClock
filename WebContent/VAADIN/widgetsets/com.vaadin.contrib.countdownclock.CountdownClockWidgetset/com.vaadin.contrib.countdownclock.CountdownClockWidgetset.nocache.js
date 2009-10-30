@@ -234,12 +234,12 @@ function com_vaadin_contrib_countdownclock_CountdownClockWidgetset(){
   $stats && $stats({moduleName:'com.vaadin.contrib.countdownclock.CountdownClockWidgetset', subSystem:'startup', evtGroup:'bootstrap', millis:(new Date()).getTime(), type:'selectingPermutation'});
   if (!strongName) {
     try {
-      unflattenKeylistIntoAnswers(['opera'], 'F5D9F8301E5E9BFD42506BAFB71FC322.cache.html');
-      unflattenKeylistIntoAnswers(['ie8'], '918BF0C42B441A75378CE202A3FD4BFF.cache.html');
-      unflattenKeylistIntoAnswers(['ie6'], '4E7F7AB7117AD5F7E12D6E52E75CC429.cache.html');
-      unflattenKeylistIntoAnswers(['gecko1_8'], 'E5C6FC978002CCD52A8D6A68D6B1095B.cache.html');
-      unflattenKeylistIntoAnswers(['safari'], 'E7013DDE0A56E29F7249E9E6CCEF13B5.cache.html');
-      unflattenKeylistIntoAnswers(['gecko'], '368615E7DEED183554BDA25BC114EB2E.cache.html');
+      unflattenKeylistIntoAnswers(['opera'], 'EE030A1B9B8F76BF241E5D5E93A0CB5A.cache.html');
+      unflattenKeylistIntoAnswers(['ie8'], '9128A3A37D5D8A27347A7A7220495920.cache.html');
+      unflattenKeylistIntoAnswers(['ie6'], '90F59B43382A867FC92BAD16E7EDD856.cache.html');
+      unflattenKeylistIntoAnswers(['gecko1_8'], 'D337A69D4CBD9EED3927A11DE854CF3E.cache.html');
+      unflattenKeylistIntoAnswers(['safari'], '1BEA06CEA589F975E185427515FC755E.cache.html');
+      unflattenKeylistIntoAnswers(['gecko'], 'D685615C2DD2CE73E3B9814ED854B353.cache.html');
       strongName = answers[computePropValue('user.agent')];
     }
      catch (e) {
