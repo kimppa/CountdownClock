@@ -1,3 +1,9 @@
 Manifest-Version: 1.0
 Class-Path: 
-
+Vaadin-Package-Version: 1
+Vaadin-Widgetsets: com.vaadin.contrib.countdownclock.CountdownClockWidgetset
+Implementation-Title: CountdownClock
+Implementation-Version: 0.0.1
+Implementation-Vendor: Oy IT Mill Ltd
+Vaadin-License-Title: Apache License 2.0
+Vaadin-License-File: http://www.apache.org/licenses/LICENSE-2.0.html

@@ -6,10 +6,13 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
+import com.vaadin.contrib.countdownclock.client.ui.VCountdownClock;
 import com.vaadin.terminal.PaintException;
 import com.vaadin.terminal.PaintTarget;
 import com.vaadin.ui.AbstractComponent;
+import com.vaadin.ui.ClientWidget;
 
+@ClientWidget(VCountdownClock.class)
 public class CountdownClock extends AbstractComponent {
 
     private static final long serialVersionUID = -4093579148150450057L;
@@ -19,11 +22,6 @@ public class CountdownClock extends AbstractComponent {
     protected String format = "%dD %hH %mM %sS";
 
     protected List<EndEventListener> listeners = new ArrayList<EndEventListener>();
-
-    @Override
-    public String getTag() {
-        return "countdownclock";
-    }
 
     public void setDate(Date date) {
         this.date = date;
