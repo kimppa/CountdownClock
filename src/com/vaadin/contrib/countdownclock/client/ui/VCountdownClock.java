@@ -122,7 +122,7 @@ public class VCountdownClock extends Widget implements Paintable {
 
                 format = format.substring(removeChars);
             } else {
-                if (formatStrings.size() <= 1) {
+                if (formatStrings.size() < 1) {
                     formatPrefix = format;
                 } else {
                     formatStrings.get(formatStrings.size() - 1).setPostfix(
