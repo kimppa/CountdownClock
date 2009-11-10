@@ -28,6 +28,7 @@ public class CountdownClock extends AbstractComponent {
     public void setDate(Date date) {
         this.date = date;
         sendEvent = true;
+        requestRepaint();
     }
 
     public Date getDate() {
@@ -74,6 +75,7 @@ public class CountdownClock extends AbstractComponent {
      */
     public void setFormat(String format) {
         this.format = format;
+        requestRepaint();
     }
 
     public String getFormat() {
