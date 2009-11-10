@@ -17,7 +17,9 @@ public class CountdownClock extends AbstractComponent {
 
     private static final long serialVersionUID = -4093579148150450057L;
 
-    protected Date date;
+    protected Date date = new Date();
+
+    protected boolean sendEvent = false;
 
     protected String format = "%dD %hH %mM %sS";
 
@@ -25,6 +27,7 @@ public class CountdownClock extends AbstractComponent {
 
     public void setDate(Date date) {
         this.date = date;
+        sendEvent = true;
     }
 
     public Date getDate() {
@@ -35,9 +38,12 @@ public class CountdownClock extends AbstractComponent {
     @Override
     public void changeVariables(Object source, Map variables) {
         super.changeVariables(source, variables);
-        if (variables.containsKey("end") && !isReadOnly()) {
-            for (EndEventListener listener : listeners) {
-                listener.countDownEnded(this);
+        if (sendEvent) {
+            if (variables.containsKey("end") && !isReadOnly()) {
+                sendEvent = false;
+                for (EndEventListener listener : listeners) {
+                    listener.countDownEnded(this);
+                }
             }
         }
     }
