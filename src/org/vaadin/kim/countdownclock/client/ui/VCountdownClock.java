@@ -1,4 +1,4 @@
-package com.vaadin.contrib.countdownclock.client.ui;
+package org.vaadin.kim.countdownclock.client.ui;
 
 import java.util.ArrayList;
 import java.util.List;

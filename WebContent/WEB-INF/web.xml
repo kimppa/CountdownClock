@@ -15,11 +15,11 @@
 			<description>
 			Vaadin application class to start</description>
 			<param-name>application</param-name>
-			<param-value>com.vaadin.contrib.countdownclock.CountdownclockApplication</param-value>
+			<param-value>org.vaadin.kim.countdownclock.CountdownclockApplication</param-value>
 		</init-param>
 		<init-param>
 			<param-name>widgetset</param-name>
-			<param-value>com.vaadin.contrib.countdownclock.CountdownClockWidgetset</param-value>
+			<param-value>org.vaadin.kim.countdownclock.CountdownClockWidgetset</param-value>
 		</init-param>
 	</servlet>
 	<servlet-mapping>

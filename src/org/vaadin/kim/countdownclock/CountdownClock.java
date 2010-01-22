@@ -1,4 +1,4 @@
-package com.vaadin.contrib.countdownclock;
+package org.vaadin.kim.countdownclock;
 
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -6,7 +6,8 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
-import com.vaadin.contrib.countdownclock.client.ui.VCountdownClock;
+import org.vaadin.kim.countdownclock.client.ui.VCountdownClock;
+
 import com.vaadin.terminal.PaintException;
 import com.vaadin.terminal.PaintTarget;
 import com.vaadin.ui.AbstractComponent;
@@ -25,12 +26,22 @@ public class CountdownClock extends AbstractComponent {
 
     protected List<EndEventListener> listeners = new ArrayList<EndEventListener>();
 
+    /**
+     * Set the target date for the countdown
+     * 
+     * @param date
+     */
     public void setDate(Date date) {
         this.date = date;
         sendEvent = true;
         requestRepaint();
     }
 
+    /**
+     * Get the current target date for the countdown
+     * 
+     * @return
+     */
     public Date getDate() {
         return date;
     }
@@ -78,20 +89,47 @@ public class CountdownClock extends AbstractComponent {
         requestRepaint();
     }
 
+    /**
+     * Get the current format being used
+     * 
+     * @return
+     */
     public String getFormat() {
         return format;
     }
 
+    /**
+     * Interface for listening to countdown events
+     * 
+     * @author Kim
+     * 
+     */
     public interface EndEventListener {
+        /**
+         * Listener for countdown events. Takes as input the clock which reached
+         * its target date and time.
+         * 
+         * @param clock
+         */
         public void countDownEnded(CountdownClock clock);
     }
 
+    /**
+     * Add a listener for countdown events.
+     * 
+     * @param listener
+     */
     public void addListener(EndEventListener listener) {
         if (listener != null) {
             listeners.add(listener);
         }
     }
 
+    /**
+     * Remove listener for countdown events.
+     * 
+     * @param listener
+     */
     public void removeListener(EndEventListener listener) {
         if (listener != null) {
             listeners.remove(listener);

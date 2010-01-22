@@ -1,9 +1,10 @@
-package com.vaadin.contrib.countdownclock;
+package org.vaadin.kim.countdownclock;
 
 import java.util.Calendar;
 
+import org.vaadin.kim.countdownclock.CountdownClock.EndEventListener;
+
 import com.vaadin.Application;
-import com.vaadin.contrib.countdownclock.CountdownClock.EndEventListener;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.VerticalLayout;
@@ -53,9 +54,7 @@ public class CountdownclockApplication extends Application {
                 clock
                         .setFormat("<span style='font: bold 25px Arial; margin: 10px'>"
                                 + "This page will self-destruct in %s.%ts seconds.</span>");
-                // clock
-                // .setFormat("<span style='font: bold 20px Arial; margin: 10px'>"
-                // + "This page will self-destruct in %s second(s)</span>");
+
                 clock.addListener(new EndEventListener() {
                     public void countDownEnded(CountdownClock clock) {
                         mainWindow
