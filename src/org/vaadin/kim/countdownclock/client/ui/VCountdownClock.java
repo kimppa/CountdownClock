@@ -275,4 +275,10 @@ public class VCountdownClock extends Widget implements Paintable {
     protected enum TimeType {
         DAYS, HOURS, MINUTES, SECONDS, TENTH_OF_A_SECONDS
     };
+    
+    @Override
+    protected void onDetach() {
+    	super.onDetach();
+    	counter.cancel();
+    }
 }
