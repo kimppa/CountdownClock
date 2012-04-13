@@ -14,8 +14,8 @@
 		<init-param>
 			<description>
 			Vaadin application class to start</description>
-			<param-name>application</param-name>
-			<param-value>org.vaadin.kim.countdownclock.CountdownclockApplication</param-value>
+			<param-name>root</param-name>
+			<param-value>org.vaadin.kim.countdownclock.CountdownclockRoot</param-value>
 		</init-param>
 		<init-param>
 			<param-name>widgetset</param-name>
