@@ -6,279 +6,279 @@ import java.util.List;
 import com.google.gwt.dom.client.Document;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.ui.Widget;
-import com.vaadin.terminal.gwt.client.ApplicationConnection;
-import com.vaadin.terminal.gwt.client.Paintable;
-import com.vaadin.terminal.gwt.client.UIDL;
 
-public class VCountdownClock extends Widget implements Paintable {
+public class VCountdownClock extends Widget {
 
-    /** Set the tagname used to statically resolve widget from UIDL. */
-    public static final String TAGNAME = "countdownclock";
+	/** Set the tagname used to statically resolve widget from UIDL. */
+	public static final String TAGNAME = "countdownclock";
 
-    /** Set the CSS class name to allow styling. */
-    public static final String CLASSNAME = "v-" + TAGNAME;
+	/** Set the CSS class name to allow styling. */
+	public static final String CLASSNAME = "v-" + TAGNAME;
 
-    /** Component identifier in UIDL communications. */
-    protected String uidlId;
+	private long time = 0;
 
-    /** Reference to the server connection object. */
-    protected ApplicationConnection client;
+	protected Counter counter = new Counter();
 
-    protected int time = 0;
+	protected List<TimeString> formatStrings = new ArrayList<TimeString>();
 
-    protected Counter counter = new Counter();
+	protected String formatPrefix = "";
 
-    protected List<TimeString> formatStrings = new ArrayList<TimeString>();
+	protected List<TimeType> formatsPresent = new ArrayList<TimeType>();
 
-    protected String formatPrefix = "";
+	protected List<CountdownEndedListener> listeners = new ArrayList<VCountdownClock.CountdownEndedListener>();
 
-    protected List<TimeType> formatsPresent = new ArrayList<TimeType>();
+	// seconds, minutes, hours, day
+	protected int oneDay = 1000 * 60 * 60 * 24;
+	// seconds, minutes, hours
+	protected int anHour = 1000 * 60 * 60;
+	// seconds, minutes
+	protected int aMinute = 1000 * 60;
+	// second
+	protected int aSecond = 1000;
 
-    // seconds, minutes, hours, day
-    protected int oneDay = 1000 * 60 * 60 * 24;
-    // seconds, minutes, hours
-    protected int anHour = 1000 * 60 * 60;
-    // seconds, minutes
-    protected int aMinute = 1000 * 60;
-    // second
-    protected int aSecond = 1000;
+	protected int timerInterval = 1000;
 
-    protected int timerInterval = 1000;
+	/**
+	 * The constructor should first call super() to initialize the component and
+	 * then handle any initialization relevant to Vaadin.
+	 */
+	public VCountdownClock() {
+		setElement(Document.get().createDivElement());
+		// This method call of the Paintable interface sets the component
+		// style name in DOM tree
+		setStyleName(CLASSNAME);
+	}
 
-    /**
-     * The constructor should first call super() to initialize the component and
-     * then handle any initialization relevant to Vaadin.
-     */
-    public VCountdownClock() {
-        setElement(Document.get().createDivElement());
-        // This method call of the Paintable interface sets the component
-        // style name in DOM tree
-        setStyleName(CLASSNAME);
-    }
+	protected void setTimeFormat(String format) {
+		formatsPresent.clear();
+		formatStrings.clear();
+		formatPrefix = "";
 
-    public void updateFromUIDL(UIDL uidl, ApplicationConnection client) {
-        // This call should be made first. Ensure correct implementation,
-        // and let the containing layout manage caption, etc.
-        if (client.updateComponent(this, uidl, true)) {
-            return;
-        }
+		// Create the format
+		while (format.length() > 0) {
+			int pos = format.indexOf("%");
+			if (pos >= 0) {
+				String before = pos > 0 ? format.substring(0, pos) : "";
 
-        // Save reference to server connection object to be able to send
-        // user interaction later
-        this.client = client;
+				format = format.substring(pos);
+				String type = format.substring(0, 2);
+				int removeChars = 2;
+				if (type.equals("%d")) {
+					TimeString ts = new TimeString(TimeType.DAYS);
+					formatStrings.add(ts);
+					formatsPresent.add(TimeType.DAYS);
+				} else if (type.equals("%h")) {
+					TimeString ts = new TimeString(TimeType.HOURS);
+					formatStrings.add(ts);
+					formatsPresent.add(TimeType.HOURS);
+				} else if (type.equals("%m")) {
+					TimeString ts = new TimeString(TimeType.MINUTES);
+					formatStrings.add(ts);
+					formatsPresent.add(TimeType.MINUTES);
+				} else if (type.equals("%s")) {
+					TimeString ts = new TimeString(TimeType.SECONDS);
+					formatStrings.add(ts);
+					formatsPresent.add(TimeType.SECONDS);
+				} else if (format.substring(0, 3).equals("%ts")) {
+					TimeString ts = new TimeString(TimeType.TENTH_OF_A_SECONDS);
+					formatStrings.add(ts);
+					formatsPresent.add(TimeType.TENTH_OF_A_SECONDS);
+					removeChars = 3;
+				} else {
+					before += type;
+				}
 
-        // Save the UIDL identifier for the component
-        uidlId = uidl.getId();
+				if (formatStrings.size() <= 1) {
+					formatPrefix = before;
+				} else {
+					formatStrings.get(formatStrings.size() - 2).setPostfix(
+							before);
+				}
 
-        UIDL child = uidl.getChildUIDL(0);
+				format = format.substring(removeChars);
+			} else {
+				if (formatStrings.size() < 1) {
+					formatPrefix = format;
+				} else {
+					formatStrings.get(formatStrings.size() - 1).setPostfix(
+							format);
+				}
+				format = "";
+			}
+		}
 
-        String format = child.getStringAttribute("format");
-        time = child.getIntAttribute("time");
+		if (formatsPresent.contains(TimeType.TENTH_OF_A_SECONDS)) {
+			timerInterval = 100;
+		} else if (formatsPresent.contains(TimeType.SECONDS)) {
+			timerInterval = aSecond;
+		} else if (formatsPresent.contains(TimeType.MINUTES)) {
+			timerInterval = aMinute;
+		} else if (formatsPresent.contains(TimeType.HOURS)) {
+			timerInterval = anHour;
+		} else if (formatsPresent.contains(TimeType.DAYS)) {
+			timerInterval = oneDay;
+		}
+	}
 
-        formatsPresent.clear();
-        formatStrings.clear();
-        formatPrefix = "";
+	public void startClock() {
+		counter.scheduleRepeating(timerInterval);
+		counter.run();
+	}
 
-        // Create the format
-        while (format.length() > 0) {
-            int pos = format.indexOf("%");
-            if (pos >= 0) {
-                String before = pos > 0 ? format.substring(0, pos) : "";
+	protected void updateLabel() {
+		String str = "";
+		if (formatPrefix != null) {
+			str += formatPrefix;
+		}
 
-                format = format.substring(pos);
-                String type = format.substring(0, 2);
-                int removeChars = 2;
-                if (type.equals("%d")) {
-                    TimeString ts = new TimeString(TimeType.DAYS);
-                    formatStrings.add(ts);
-                    formatsPresent.add(TimeType.DAYS);
-                } else if (type.equals("%h")) {
-                    TimeString ts = new TimeString(TimeType.HOURS);
-                    formatStrings.add(ts);
-                    formatsPresent.add(TimeType.HOURS);
-                } else if (type.equals("%m")) {
-                    TimeString ts = new TimeString(TimeType.MINUTES);
-                    formatStrings.add(ts);
-                    formatsPresent.add(TimeType.MINUTES);
-                } else if (type.equals("%s")) {
-                    TimeString ts = new TimeString(TimeType.SECONDS);
-                    formatStrings.add(ts);
-                    formatsPresent.add(TimeType.SECONDS);
-                } else if (format.substring(0, 3).equals("%ts")) {
-                    TimeString ts = new TimeString(TimeType.TENTH_OF_A_SECONDS);
-                    formatStrings.add(ts);
-                    formatsPresent.add(TimeType.TENTH_OF_A_SECONDS);
-                    removeChars = 3;
-                } else {
-                    before += type;
-                }
+		for (TimeString ts : formatStrings) {
+			str += ts.getValue(getTime());
+		}
 
-                if (formatStrings.size() <= 1) {
-                    formatPrefix = before;
-                } else {
-                    formatStrings.get(formatStrings.size() - 2).setPostfix(
-                            before);
-                }
+		getElement().setInnerHTML(str);
+	}
 
-                format = format.substring(removeChars);
-            } else {
-                if (formatStrings.size() < 1) {
-                    formatPrefix = format;
-                } else {
-                    formatStrings.get(formatStrings.size() - 1).setPostfix(
-                            format);
-                }
-                format = "";
-            }
-        }
+	protected class Counter extends Timer {
+		@Override
+		public void run() {
+			setTime(getTime() - timerInterval);
+			if (getTime() <= 0) {
+				cancel();
+				fireEndEvent();
+				setTime(0);
+			}
+			updateLabel();
+		}
+	}
 
-        if (formatsPresent.contains(TimeType.TENTH_OF_A_SECONDS)) {
-            timerInterval = 100;
-        } else if (formatsPresent.contains(TimeType.SECONDS)) {
-            timerInterval = aSecond;
-        } else if (formatsPresent.contains(TimeType.MINUTES)) {
-            timerInterval = aMinute;
-        } else if (formatsPresent.contains(TimeType.HOURS)) {
-            timerInterval = anHour;
-        } else if (formatsPresent.contains(TimeType.DAYS)) {
-            timerInterval = oneDay;
-        }
-        counter.scheduleRepeating(timerInterval);
-        counter.run();
-    }
+	protected class TimeString {
 
-    protected void updateLabel() {
-        String str = "";
-        if (formatPrefix != null) {
-            str += formatPrefix;
-        }
+		protected String postfix = null;
 
-        for (TimeString ts : formatStrings) {
-            str += ts.getValue(time);
-        }
+		protected TimeType type = null;
 
-        getElement().setInnerHTML(str);
-    }
+		public TimeString(TimeType type) {
+			this.type = type;
+		}
 
-    protected class Counter extends Timer {
-        @Override
-        public void run() {
-            time -= timerInterval;
-            if (time <= 0) {
-                cancel();
-                client.updateVariable(uidlId, "end", true, true);
-                time = 0;
-            }
-            updateLabel();
-        }
-    }
+		public String getString(int milliseconds) {
+			return null;
+		}
 
-    protected class TimeString {
+		public void setPostfix(String postfix) {
+			this.postfix = postfix;
+		}
 
-        protected String postfix = null;
+		public String getPostfix() {
+			return postfix;
+		}
 
-        protected TimeType type = null;
+		public String getValue(long milliseconds) {
+			if (type.equals(TimeType.DAYS)) {
+				return getDays(milliseconds) + postfix;
+			} else if (type.equals(TimeType.HOURS)) {
+				// Check if a day exists in the format, in that case remove all
+				// full days from the time
+				if (formatsPresent.contains(TimeType.DAYS)) {
+					milliseconds -= getDays(milliseconds) * oneDay;
+				}
+				return getHours(milliseconds) + postfix;
+			} else if (type.equals(TimeType.MINUTES)) {
+				// Check if a day exists in the format, in that case remove all
+				// full days from the time
+				if (formatsPresent.contains(TimeType.DAYS)) {
+					milliseconds -= getDays(milliseconds) * oneDay;
+				}
+				if (formatsPresent.contains(TimeType.HOURS)) {
+					milliseconds -= getHours(milliseconds) * anHour;
+				}
+				return getMinutes(milliseconds) + postfix;
+			} else if (type.equals(TimeType.SECONDS)) {
+				// Check if a day exists in the format, in that case remove all
+				// full days from the time
+				if (formatsPresent.contains(TimeType.DAYS)) {
+					milliseconds -= getDays(milliseconds) * oneDay;
+				}
+				if (formatsPresent.contains(TimeType.HOURS)) {
+					milliseconds -= getHours(milliseconds) * anHour;
+				}
+				if (formatsPresent.contains(TimeType.MINUTES)) {
+					milliseconds -= getMinutes(milliseconds) * aMinute;
+				}
+				return getSeconds(milliseconds) + postfix;
+			} else if (type.equals(TimeType.TENTH_OF_A_SECONDS)) {
+				// Check if a day exists in the format, in that case remove all
+				// full days from the time
+				if (formatsPresent.contains(TimeType.DAYS)) {
+					milliseconds -= getDays(milliseconds) * oneDay;
+				}
+				if (formatsPresent.contains(TimeType.HOURS)) {
+					milliseconds -= getHours(milliseconds) * anHour;
+				}
+				if (formatsPresent.contains(TimeType.MINUTES)) {
+					milliseconds -= getMinutes(milliseconds) * aMinute;
+				}
+				if (formatsPresent.contains(TimeType.SECONDS)) {
+					milliseconds -= getSeconds(milliseconds) * aSecond;
+				}
+				return Math.round(milliseconds / 100) + postfix;
+			} else {
+				return "";
+			}
 
-        public TimeString(TimeType type) {
-            this.type = type;
-        }
+		}
 
-        public String getString(int milliseconds) {
-            return null;
-        }
+		@Override
+		public String toString() {
+			return type.name();
+		}
 
-        public void setPostfix(String postfix) {
-            this.postfix = postfix;
-        }
+		protected long getDays(long milliseconds) {
+			return (long) Math.floor(milliseconds / oneDay);
+		}
 
-        public String getPostfix() {
-            return postfix;
-        }
+		protected long getHours(long milliseconds) {
+			return (long) Math.floor(milliseconds / anHour);
+		}
 
-        public String getValue(int milliseconds) {
-            if (type.equals(TimeType.DAYS)) {
-                return getDays(milliseconds) + postfix;
-            } else if (type.equals(TimeType.HOURS)) {
-                // Check if a day exists in the format, in that case remove all
-                // full days from the time
-                if (formatsPresent.contains(TimeType.DAYS)) {
-                    milliseconds -= getDays(milliseconds) * oneDay;
-                }
-                return getHours(milliseconds) + postfix;
-            } else if (type.equals(TimeType.MINUTES)) {
-                // Check if a day exists in the format, in that case remove all
-                // full days from the time
-                if (formatsPresent.contains(TimeType.DAYS)) {
-                    milliseconds -= getDays(milliseconds) * oneDay;
-                }
-                if (formatsPresent.contains(TimeType.HOURS)) {
-                    milliseconds -= getHours(milliseconds) * anHour;
-                }
-                return getMinutes(milliseconds) + postfix;
-            } else if (type.equals(TimeType.SECONDS)) {
-                // Check if a day exists in the format, in that case remove all
-                // full days from the time
-                if (formatsPresent.contains(TimeType.DAYS)) {
-                    milliseconds -= getDays(milliseconds) * oneDay;
-                }
-                if (formatsPresent.contains(TimeType.HOURS)) {
-                    milliseconds -= getHours(milliseconds) * anHour;
-                }
-                if (formatsPresent.contains(TimeType.MINUTES)) {
-                    milliseconds -= getMinutes(milliseconds) * aMinute;
-                }
-                return getSeconds(milliseconds) + postfix;
-            } else if (type.equals(TimeType.TENTH_OF_A_SECONDS)) {
-                // Check if a day exists in the format, in that case remove all
-                // full days from the time
-                if (formatsPresent.contains(TimeType.DAYS)) {
-                    milliseconds -= getDays(milliseconds) * oneDay;
-                }
-                if (formatsPresent.contains(TimeType.HOURS)) {
-                    milliseconds -= getHours(milliseconds) * anHour;
-                }
-                if (formatsPresent.contains(TimeType.MINUTES)) {
-                    milliseconds -= getMinutes(milliseconds) * aMinute;
-                }
-                if (formatsPresent.contains(TimeType.SECONDS)) {
-                    milliseconds -= getSeconds(milliseconds) * aSecond;
-                }
-                return Math.round(milliseconds / 100) + postfix;
-            } else {
-                return "";
-            }
+		protected long getMinutes(long milliseconds) {
+			return (long) Math.floor(milliseconds / aMinute);
+		}
 
-        }
+		protected long getSeconds(long milliseconds) {
+			return (long) Math.floor(milliseconds / aSecond);
+		}
+	}
 
-        @Override
-        public String toString() {
-            return type.name();
-        }
+	protected enum TimeType {
+		DAYS, HOURS, MINUTES, SECONDS, TENTH_OF_A_SECONDS
+	};
 
-        protected int getDays(int milliseconds) {
-            return (int) Math.floor(milliseconds / oneDay);
-        }
+	@Override
+	protected void onDetach() {
+		super.onDetach();
+		counter.cancel();
+	}
 
-        protected int getHours(int milliseconds) {
-            return (int) Math.floor(milliseconds / anHour);
-        }
+	public void fireEndEvent() {
+		for (CountdownEndedListener listener : listeners) {
+			listener.countdownEnded();
+		}
+	}
 
-        protected int getMinutes(int milliseconds) {
-            return (int) Math.floor(milliseconds / aMinute);
-        }
+	public long getTime() {
+		return time;
+	}
 
-        protected int getSeconds(int milliseconds) {
-            return (int) Math.floor(milliseconds / aSecond);
-        }
-    }
+	public void setTime(long time) {
+		this.time = time;
+	}
 
-    protected enum TimeType {
-        DAYS, HOURS, MINUTES, SECONDS, TENTH_OF_A_SECONDS
-    };
-    
-    @Override
-    protected void onDetach() {
-    	super.onDetach();
-    	counter.cancel();
-    }
+	public interface CountdownEndedListener {
+		public void countdownEnded();
+	}
+
+	public void addListener(CountdownEndedListener listener) {
+		listeners.add(listener);
+	}
 }

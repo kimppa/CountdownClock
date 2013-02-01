@@ -4,3 +4,4 @@
 src/rebel.xml
 build
 WebContent/VAADIN/widgetsets
+GWT development mode for CountdownClock.launch

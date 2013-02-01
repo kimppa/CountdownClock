@@ -2,10 +2,10 @@ Manifest-Version: 1.0
 Vaadin-License-Title: Apache License 2.0
 Implementation-Vendor: Kim Leppänen
 Implementation-Title: CountdownClock
-Implementation-Version: 1.0
+Implementation-Version: 2.0.1
 Vaadin-License-File: http://www.apache.org/licenses/LICENSE-2.0.html
 Vaadin-Package-Version: 1
-Vaadin-Widgetsets: org.vaadin.kim.countdownclock.CountdownClockWid
- getset
 Class-Path: 
+Vaadin-Widgetsets: org.vaadin.kim.countdownclock.CountdownClockWidgets
+ et
 

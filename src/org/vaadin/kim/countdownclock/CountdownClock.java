@@ -4,136 +4,146 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
-import java.util.Map;
 
-import org.vaadin.kim.countdownclock.client.ui.VCountdownClock;
+import org.vaadin.kim.countdownclock.client.ui.CountdownClockRpc;
+import org.vaadin.kim.countdownclock.client.ui.CountdownClockState;
 
-import com.vaadin.terminal.PaintException;
-import com.vaadin.terminal.PaintTarget;
 import com.vaadin.ui.AbstractComponent;
-import com.vaadin.ui.ClientWidget;
 
-@ClientWidget(VCountdownClock.class)
 public class CountdownClock extends AbstractComponent {
 
-    private static final long serialVersionUID = -4093579148150450057L;
+	private static final long serialVersionUID = -4093579148150450057L;
 
-    protected Date date = new Date();
+	protected Date date = new Date();
 
-    protected boolean sendEvent = false;
+	protected boolean sendEvent = false;
 
-    protected String format = "%dD %hH %mM %sS";
+	protected String format = "%dD %hH %mM %sS";
 
-    protected List<EndEventListener> listeners = new ArrayList<EndEventListener>();
+	protected List<EndEventListener> listeners = new ArrayList<EndEventListener>();
 
-    /**
-     * Set the target date for the countdown
-     * 
-     * @param date
-     */
-    public void setDate(Date date) {
-        this.date = date;
-        sendEvent = true;
-        requestRepaint();
-    }
+	public CountdownClock() {
+		CountdownClockRpc rpc = new CountdownClockRpc() {
+			private static final long serialVersionUID = -7392569455421206075L;
 
-    /**
-     * Get the current target date for the countdown
-     * 
-     * @return
-     */
-    public Date getDate() {
-        return date;
-    }
+			public void countdownEnded() {
+				for (EndEventListener listener : listeners) {
+					listener.countDownEnded(CountdownClock.this);
+				}
+			}
+		};
+		registerRpc(rpc);
+	}
 
-    @SuppressWarnings("unchecked")
-    @Override
-    public void changeVariables(Object source, Map variables) {
-        super.changeVariables(source, variables);
-        if (sendEvent) {
-            if (variables.containsKey("end") && !isReadOnly()) {
-                sendEvent = false;
-                for (EndEventListener listener : listeners) {
-                    listener.countDownEnded(this);
-                }
-            }
-        }
-    }
+	/**
+	 * Set the target date for the countdown
+	 * 
+	 * @param date
+	 */
+	public void setDate(Date date) {
+		this.date = date;
+		sendEvent = true;
+		
+		
+		Calendar calendar = Calendar.getInstance();
+		calendar.setTime(date);
+		long difference = calendar.getTimeInMillis()
+				- Calendar.getInstance().getTimeInMillis();
+		getState().setCountdownTarget(difference);
+	}
 
-    @Override
-    public void paintContent(PaintTarget target) throws PaintException {
-        super.paintContent(target);
-        target.startTag("countdown");
-        Calendar calendar = Calendar.getInstance();
-        calendar.setTime(date);
-        long difference = calendar.getTimeInMillis()
-                - Calendar.getInstance().getTimeInMillis();
+	/**
+	 * Get the current target date for the countdown
+	 * 
+	 * @return
+	 */
+	public Date getDate() {
+		return date;
+	}
 
-        target.addAttribute("time", difference);
-        target.addAttribute("format", format);
-        target.endTag("countdown");
-    }
+	@Override
+	public CountdownClockState getState() {
+		return (CountdownClockState) super.getState();
+	}
 
-    /**
-     * Set the format for the clock. Available parameters:
-     * 
-     * %d - days %h - hours %m - minutes %s - seconds %ts - tenth of a seconds
-     * 
-     * For example "%d day(s) %h hour(s) and %m minutes" could produce the
-     * string "2 day(s) 23 hour(s) and 5 minutes"
-     * 
-     * @param format
-     */
-    public void setFormat(String format) {
-        this.format = format;
-        requestRepaint();
-    }
+	/**
+	 * Set the format for the clock. Available parameters:
+	 * 
+	 * %d - days %h - hours %m - minutes %s - seconds %ts - tenth of a seconds
+	 * 
+	 * For example "%d day(s) %h hour(s) and %m minutes" could produce the
+	 * string "2 day(s) 23 hour(s) and 5 minutes"
+	 * 
+	 * @param format
+	 */
+	public void setFormat(String format) {
+		getState().setTimeFormat(format);
+	}
 
-    /**
-     * Get the current format being used
-     * 
-     * @return
-     */
-    public String getFormat() {
-        return format;
-    }
+	/**
+	 * Get the current format being used
+	 * 
+	 * @return
+	 */
+	public String getFormat() {
+		return getState().getTimeFormat();
+	}
 
-    /**
-     * Interface for listening to countdown events
-     * 
-     * @author Kim
-     * 
-     */
-    public interface EndEventListener {
-        /**
-         * Listener for countdown events. Takes as input the clock which reached
-         * its target date and time.
-         * 
-         * @param clock
-         */
-        public void countDownEnded(CountdownClock clock);
-    }
+	/**
+	 * Interface for listening to countdown events
+	 * 
+	 * @author Kim
+	 * 
+	 */
+	public interface EndEventListener {
+		/**
+		 * Listener for countdown events. Takes as input the clock which reached
+		 * its target date and time.
+		 * 
+		 * @param clock
+		 */
+		public void countDownEnded(CountdownClock clock);
+	}
 
-    /**
-     * Add a listener for countdown events.
-     * 
-     * @param listener
-     */
-    public void addListener(EndEventListener listener) {
-        if (listener != null) {
-            listeners.add(listener);
-        }
-    }
+	/**
+	 * Add a listener for countdown events.
+	 * 
+	 * @param listener
+	 */
+	@Deprecated
+	public void addListener(EndEventListener listener) {
+		addEndEventListener(listener);
+	}
+	
+	/**
+	 * Add a listener for countdown events.
+	 * 
+	 * @param listener
+	 */
+	public void addEndEventListener(EndEventListener listener) {
+		if (listener != null) {
+			listeners.add(listener);
+		}
+	}
 
-    /**
-     * Remove listener for countdown events.
-     * 
-     * @param listener
-     */
-    public void removeListener(EndEventListener listener) {
-        if (listener != null) {
-            listeners.remove(listener);
-        }
-    }
+	/**
+	 * Remove listener for countdown events.
+	 * 
+	 * @param listener
+	 */
+	@Deprecated
+	public void removeListener(EndEventListener listener) {
+		removeEndEventListener(listener);
+	}
+	/**
+	 * Remove listener for countdown events.
+	 * 
+	 * @param listener
+	 */
+	public void removeEndEventListener(EndEventListener listener) {
+		if (listener != null) {
+			listeners.remove(listener);
+		}
+	}
 
 }

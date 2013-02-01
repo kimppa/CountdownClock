@@ -1,5 +1,7 @@
 <module>
 	<!-- Inherit super widgetset -->
-	<inherits name="com.vaadin.terminal.gwt.DefaultWidgetSet" /> 
+	 
 	
+
+    <inherits name="com.vaadin.DefaultWidgetSet" />
 </module>
