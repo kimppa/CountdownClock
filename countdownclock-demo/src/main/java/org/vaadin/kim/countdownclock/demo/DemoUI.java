@@ -1,10 +1,15 @@
-package org.vaadin.kim.countdownclock;
+package org.vaadin.kim.countdownclock.demo;
 
 import java.util.Calendar;
 
+import javax.servlet.annotation.WebServlet;
+
+import org.vaadin.kim.countdownclock.CountdownClock;
 import org.vaadin.kim.countdownclock.CountdownClock.EndEventListener;
 
+import com.vaadin.annotations.VaadinServletConfiguration;
 import com.vaadin.server.VaadinRequest;
+import com.vaadin.server.VaadinServlet;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.Button.ClickListener;
@@ -13,10 +18,14 @@ import com.vaadin.ui.Notification;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
 
-public class CountdownclockUI extends UI {
+public class DemoUI extends UI {
 
 	private static final long serialVersionUID = -2474563921376269949L;
 
+    @WebServlet(value = "/*", asyncSupported = true)
+    @VaadinServletConfiguration(productionMode = false, ui = DemoUI.class)
+    public static class Servlet extends VaadinServlet {}
+	
 	@Override
 	protected void init(VaadinRequest request) {
 		final VerticalLayout layout = new VerticalLayout();
