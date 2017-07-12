@@ -5,7 +5,7 @@
 	<groupId>org.vaadin</groupId>
 	<artifactId>countdownclock-root</artifactId>
 	<packaging>pom</packaging>
-	<version>2.0.2</version>
+	<version>2.0.3</version>
 	<name>CountdownClock Add-on Root Project</name>
 
 	<prerequisites>

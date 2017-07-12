@@ -1,6 +1,7 @@
 package org.vaadin.kim.countdownclock.demo;
 
 import java.util.Calendar;
+import java.util.Date;
 
 import javax.servlet.annotation.WebServlet;
 
@@ -31,11 +32,24 @@ public class DemoUI extends UI {
 		final VerticalLayout layout = new VerticalLayout();
 		setContent(layout);
 
+
 		Label label = new Label(
 				"Just specify the format of the count down and "
 						+ "the date to which to count and you're set to go! "
 						+ "Here is an example:");
 		layout.addComponent(label);
+
+		layout.addComponent(new Label("One example:"));
+		CountdownClock clock2 = new CountdownClock();
+		Calendar cal = Calendar.getInstance();
+		cal.add(Calendar.SECOND, 10);
+		cal.add(Calendar.DAY_OF_MONTH, 2);
+		clock2.setDate(cal.getTime());
+		clock2.setNeglectHigherUnits(true);
+		clock2.setFormat("%s");
+		layout.addComponent(clock2);
+
+		layout.addComponent(new Label("...or two.. :"));
 
 		CountdownClock clock1 = new CountdownClock();
 		Calendar c = Calendar.getInstance();
@@ -46,8 +60,10 @@ public class DemoUI extends UI {
 		clock1.setHeight("40px");
 
 		layout.addComponent(clock1);
-		final CountdownClock clock = new CountdownClock();
 
+
+
+		final CountdownClock clock = new CountdownClock();
 		Button button = new Button("Don't click on me", new ClickListener() {
 			private static final long serialVersionUID = -3301865196296699922L;
 
@@ -63,15 +79,13 @@ public class DemoUI extends UI {
 					public void countDownEnded(CountdownClock clock) {
 						Notification
 								.show("Ok, implementing the page destruction was"
-										+ "kinda hard, so could you please just imagine"
+										+ " kinda hard, so could you please just imagine"
 										+ " it happening?", Notification.Type.ERROR_MESSAGE);
 					}
 				});
 				layout.addComponent(clock);
 			}
 		});
-
 		layout.addComponent(button);
 	}
-
 }

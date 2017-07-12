@@ -49,7 +49,21 @@ public class VCountdownClock extends Widget {
 		setStyleName(CLASSNAME);
 	}
 
+	/**
+	 * Neglect higher units; so if we have 2 days and 3 hours left that would mean
+	 * 27 hours. Set to true if you want %h to return 3 and not 27.
+	 * Note %h would return 3 anyway in case a %d is detected in the format string.
+	 *
+	 * @param neglect Whether or not to neglect higher units.
+	 */
+	protected void setNeglectHigherUnits(boolean neglect){
+		this.neglectHigher = neglect;
+	}
+
+	private boolean neglectHigher = false;
+
 	protected void setTimeFormat(String format) {
+
 		formatsPresent.clear();
 		formatStrings.clear();
 		formatPrefix = "";
@@ -153,16 +167,12 @@ public class VCountdownClock extends Widget {
 
 	protected class TimeString {
 
-		protected String postfix = null;
+		protected String postfix = "";
 
 		protected TimeType type = null;
 
 		public TimeString(TimeType type) {
 			this.type = type;
-		}
-
-		public String getString(int milliseconds) {
-			return null;
 		}
 
 		public void setPostfix(String postfix) {
@@ -179,46 +189,46 @@ public class VCountdownClock extends Widget {
 			} else if (type.equals(TimeType.HOURS)) {
 				// Check if a day exists in the format, in that case remove all
 				// full days from the time
-				if (formatsPresent.contains(TimeType.DAYS)) {
+				if (neglectHigher || formatsPresent.contains(TimeType.DAYS)) {
 					milliseconds -= getDays(milliseconds) * oneDay;
 				}
 				return getHours(milliseconds) + postfix;
 			} else if (type.equals(TimeType.MINUTES)) {
 				// Check if a day exists in the format, in that case remove all
 				// full days from the time
-				if (formatsPresent.contains(TimeType.DAYS)) {
+				if (neglectHigher || formatsPresent.contains(TimeType.DAYS)) {
 					milliseconds -= getDays(milliseconds) * oneDay;
 				}
-				if (formatsPresent.contains(TimeType.HOURS)) {
+				if (neglectHigher || formatsPresent.contains(TimeType.HOURS)) {
 					milliseconds -= getHours(milliseconds) * anHour;
 				}
 				return getMinutes(milliseconds) + postfix;
 			} else if (type.equals(TimeType.SECONDS)) {
 				// Check if a day exists in the format, in that case remove all
 				// full days from the time
-				if (formatsPresent.contains(TimeType.DAYS)) {
+				if (neglectHigher || formatsPresent.contains(TimeType.DAYS)) {
 					milliseconds -= getDays(milliseconds) * oneDay;
 				}
-				if (formatsPresent.contains(TimeType.HOURS)) {
+				if (neglectHigher || formatsPresent.contains(TimeType.HOURS)) {
 					milliseconds -= getHours(milliseconds) * anHour;
 				}
-				if (formatsPresent.contains(TimeType.MINUTES)) {
+				if (neglectHigher || formatsPresent.contains(TimeType.MINUTES)) {
 					milliseconds -= getMinutes(milliseconds) * aMinute;
 				}
 				return getSeconds(milliseconds) + postfix;
 			} else if (type.equals(TimeType.TENTH_OF_A_SECONDS)) {
 				// Check if a day exists in the format, in that case remove all
 				// full days from the time
-				if (formatsPresent.contains(TimeType.DAYS)) {
+				if (neglectHigher || formatsPresent.contains(TimeType.DAYS)) {
 					milliseconds -= getDays(milliseconds) * oneDay;
 				}
-				if (formatsPresent.contains(TimeType.HOURS)) {
+				if (neglectHigher || formatsPresent.contains(TimeType.HOURS)) {
 					milliseconds -= getHours(milliseconds) * anHour;
 				}
-				if (formatsPresent.contains(TimeType.MINUTES)) {
+				if (neglectHigher || formatsPresent.contains(TimeType.MINUTES)) {
 					milliseconds -= getMinutes(milliseconds) * aMinute;
 				}
-				if (formatsPresent.contains(TimeType.SECONDS)) {
+				if (neglectHigher || formatsPresent.contains(TimeType.SECONDS)) {
 					milliseconds -= getSeconds(milliseconds) * aSecond;
 				}
 				return Math.round(milliseconds / 100) + postfix;

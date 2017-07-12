@@ -47,6 +47,7 @@ public class CountdownClockConnector extends AbstractComponentConnector
 		super.onStateChanged(stateChangeEvent);
 		getWidget().setTime(getState().getCountdownTarget());
 		getWidget().setTimeFormat(getState().getTimeFormat());
+		getWidget().setNeglectHigherUnits(getState().isNeglectHigherUnits());
 		getWidget().startClock();
 	}
 

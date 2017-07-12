@@ -20,6 +20,15 @@ public class CountdownClockState extends AbstractComponentState {
 	 */
 	private long countdownTarget;
 
+	/**
+	 *
+	 */
+	private boolean neglectHigherUnits;
+
+	public void setNeglectHigherUnits(boolean neglect){ this.neglectHigherUnits = neglect; }
+
+	public boolean isNeglectHigherUnits() { return neglectHigherUnits; }
+
 	public String getTimeFormat() {
 		return timeFormat;
 	}

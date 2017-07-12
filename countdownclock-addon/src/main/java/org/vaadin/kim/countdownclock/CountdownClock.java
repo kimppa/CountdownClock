@@ -146,4 +146,17 @@ public class CountdownClock extends AbstractComponent {
 		}
 	}
 
+	/**
+	 * Neglegting higher units means that e.g. the number seconds is always shown as 0-59,
+	 * even if there are a number of minutes left that are not shown (no %m in the format).
+	 *
+	 * @param neglect
+	 */
+	public void setNeglectHigherUnits(boolean neglect){
+		getState().setNeglectHigherUnits(neglect);
+	}
+
+	public boolean getNeglectHigherUnits(){
+		return getState().isNeglectHigherUnits();
+	}
 }
